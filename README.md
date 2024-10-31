@@ -1,63 +1,74 @@
 # Comfyui_api_client
-ComfyUI の API にデータを投げやすくするだけのクラスです。
+This is a class that makes it easier to send data to the ComfyUI API.
 
-普通版（ComfyUiClient）と、async 版（ComfyUiClientAsync）があります。
+There are two versions: the regular version (`ComfyUiClient`) and the async version (`ComfyUiClientAsync`).
 
-特徴としては、ノード名を自動で探して、データを入れてくれる set_data メソッドです。
+A key feature is the `set_data` method, which automatically finds the node name and inserts the data.
 
-例えば、CLIP Text Encode Positive というタイトルを付けたノードがあり、そこのテキスト部分にテキストを入れたい場合
+For example, if there is a node titled "CLIP Text Encode Positive" and you want to insert text into its text part:
 
-    comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
-    
-こう指定する事で、該当ノードの text 部分にテキストを入れられます。
+```python
+comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
+```
 
-set_data には複数の引数があり、text, seed, image が受け取れます。image は、PIL.Image 型の画像を受け取ってサーバーにアップロードしてパラメータをセットします。これは Load Image ノードの利用を想定しています。
+By specifying this, you can insert text into the text part of the corresponding node.
 
-    comfyui_client.set_data(key='Load Image', image=Image.open(input_image_file))
+The `set_data` method accepts multiple arguments: `text`, `seed`, and `image`. The `image` argument accepts a `PIL.Image` type image, uploads it to the server, and sets the parameter. This is intended for use with the Load Image node.
 
-また生成された画像を保存するときは、
+```python
+comfyui_client.set_data(key='Load Image', image=Image.open(input_image_file))
+```
 
-    comfyui_client.generate(["Result Image"])
-    
-この generate メソッドに配列として、ノードの名前を指定する事で、画像を取り出せます。
+To save the generated image:
 
-従って、ワークフローを作る時に、取り出したい画像はノード名を固有の分かりやすい名前にしておく必要があります。
+```python
+comfyui_client.generate(["Result Image"])
+```
 
-返り値は、ノード名と画像（PIL.Image）のペアなので、適宜取り出して処理出来ます。
+By specifying the node names as an array in this `generate` method, you can retrieve the images.
+
+Therefore, when creating a workflow, you need to give the nodes you want to retrieve images from unique and easily recognizable names.
+
+The return value is a pair of node names and images (`PIL.Image`), so you can process them as needed.
 
 # Sample
 
-    comfyui_client = None
-    try:
-        comfyui_client = ComfyUIClient("127.0.0.1:8188", "workflow_api.json")
-        # If you need to authenticate, you can use the following code
-        # comfyui_client = ComfyUIClientAsync("http://127.0.0.1:8188", "workflow_api.json", username="user", password="password")
-        comfyui_client.connect()
-        comfyui_client.set_data(key='KSampler', seed=random.randint(0, sys.maxsize))
-        comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
-        # If you need to upload an image, you can use the following code `from PIL import Image`
-        # comfyui_client.set_data(key='KSampler', comfyui_client.set_data(key='Load Image', image=Image.open('input_image.png')))
-        for key, image in comfyui_client.generate(["Result Image"]).items():
-            image.save(f"{key}.png")
-            print(f"Saved {key}.png")
-    finally:
-        if comfyui_client is not None:
-            comfyui_client.close()
+```python
+comfyui_client = None
+try:
+    comfyui_client = ComfyUIClient("127.0.0.1:8188", "workflow_api.json")
+    # If you need to authenticate, you can use the following code
+    # comfyui_client = ComfyUIClientAsync("http://127.0.0.1:8188", "workflow_api.json", username="user", password="password")
+    comfyui_client.connect()
+    comfyui_client.set_data(key='KSampler', seed=random.randint(0, sys.maxsize))
+    comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
+    # If you need to upload an image, you can use the following code `from PIL import Image`
+    # comfyui_client.set_data(key='KSampler', comfyui_client.set_data(key='Load Image', image=Image.open('input_image.png')))
+    for key, image in comfyui_client.generate(["Result Image"]).items():
+        image.save(f"{key}.png")
+        print(f"Saved {key}.png")
+finally:
+    if comfyui_client is not None:
+        comfyui_client.close()
+```
 
 # Sample Async
-    comfyui_client = None
-    try:
-        comfyui_client = ComfyUIClientAsync("127.0.0.1:8188", "workflow_api.json")
-        # If you need to authenticate, you can use the following code
-        # comfyui_client = ComfyUIClientAsync("http://127.0.0.1:8188", "workflow_api.json", username="user", password="password")
-        await comfyui_client.connect()
-        comfyui_client.set_data(key='KSampler', seed=random.randint(0, sys.maxsize))
-        comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
-        # If you need to upload an image, you can use the following code `from PIL import Image`
-        # comfyui_client.set_data(key='KSampler', comfyui_client.set_data(key='Load Image', image=Image.open('input_image.png')))
-        for key, image in (await comfyui_client.generate(["Result Image"])).items():
-            image.save(f"{key}_async.png")
-            print(f"Saved {key}_async.png")
-    finally:
-        if comfyui_client is not None:
-            await comfyui_client.close()
+
+```python
+comfyui_client = None
+try:
+    comfyui_client = ComfyUIClientAsync("127.0.0.1:8188", "workflow_api.json")
+    # If you need to authenticate, you can use the following code
+    # comfyui_client = ComfyUIClientAsync("http://127.0.0.1:8188", "workflow_api.json", username="user", password="password")
+    await comfyui_client.connect()
+    comfyui_client.set_data(key='KSampler', seed=random.randint(0, sys.maxsize))
+    comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
+    # If you need to upload an image, you can use the following code `from PIL import Image`
+    # comfyui_client.set_data(key='KSampler', comfyui_client.set_data(key='Load Image', image=Image.open('input_image.png')))
+    for key, image in (await comfyui_client.generate(["Result Image"])).items():
+        image.save(f"{key}_async.png")
+        print(f"Saved {key}_async.png")
+finally:
+    if comfyui_client is not None:
+        await comfyui_client.close()
+```
