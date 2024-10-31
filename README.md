@@ -30,9 +30,13 @@ set_data には複数の引数があり、text, seed, image が受け取れま�
     comfyui_client = None
     try:
         comfyui_client = ComfyUIClient("127.0.0.1:8188", "workflow_api.json")
+        # If you need to authenticate, you can use the following code
+        # comfyui_client = ComfyUIClientAsync("http://127.0.0.1:8188", "workflow_api.json", username="user", password="password")
         comfyui_client.connect()
         comfyui_client.set_data(key='KSampler', seed=random.randint(0, sys.maxsize))
         comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
+        # If you need to upload an image, you can use the following code `from PIL import Image`
+        # comfyui_client.set_data(key='KSampler', comfyui_client.set_data(key='Load Image', image=Image.open('input_image.png')))
         for key, image in comfyui_client.generate(["Result Image"]).items():
             image.save(f"{key}.png")
             print(f"Saved {key}.png")
@@ -44,9 +48,13 @@ set_data には複数の引数があり、text, seed, image が受け取れま�
     comfyui_client = None
     try:
         comfyui_client = ComfyUIClientAsync("127.0.0.1:8188", "workflow_api.json")
+        # If you need to authenticate, you can use the following code
+        # comfyui_client = ComfyUIClientAsync("http://127.0.0.1:8188", "workflow_api.json", username="user", password="password")
         await comfyui_client.connect()
         comfyui_client.set_data(key='KSampler', seed=random.randint(0, sys.maxsize))
         comfyui_client.set_data(key='CLIP Text Encode Positive', text="beautiful landscape painting")
+        # If you need to upload an image, you can use the following code `from PIL import Image`
+        # comfyui_client.set_data(key='KSampler', comfyui_client.set_data(key='Load Image', image=Image.open('input_image.png')))
         for key, image in (await comfyui_client.generate(["Result Image"])).items():
             image.save(f"{key}_async.png")
             print(f"Saved {key}_async.png")
